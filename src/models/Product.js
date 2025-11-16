@@ -10,7 +10,7 @@ class Product {
     this.name = data.name;
     this.description = data.description || '';
     this.price = data.price;
-    this.category = data.category || 'Без категории';
+    this.category_id = data.category_id || null;
     this.inStock = data.inStock !== undefined ? data.inStock : true;
     this.createdAt = data.createdAt || new Date();
     this.updatedAt = data.updatedAt || new Date();
@@ -42,8 +42,8 @@ class Product {
       errors.push('Описание должно быть строкой');
     }
 
-    if (data.category !== undefined && typeof data.category !== 'string') {
-      errors.push('Категория должна быть строкой');
+    if (data.category_id !== undefined && data.category_id !== null && typeof data.category_id !== 'string') {
+      errors.push('ID категории должен быть строкой');
     }
 
     if (data.inStock !== undefined && typeof data.inStock !== 'boolean') {
@@ -57,7 +57,7 @@ class Product {
     if (data.name !== undefined) this.name = data.name;
     if (data.description !== undefined) this.description = data.description;
     if (data.price !== undefined) this.price = data.price;
-    if (data.category !== undefined) this.category = data.category;
+    if (data.category_id !== undefined) this.category_id = data.category_id;
     if (data.inStock !== undefined) this.inStock = data.inStock;
     this.updatedAt = new Date();
     return this;
@@ -69,7 +69,7 @@ class Product {
       name: this.name,
       description: this.description,
       price: this.price,
-      category: this.category,
+      category_id: this.category_id,
       inStock: this.inStock,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt

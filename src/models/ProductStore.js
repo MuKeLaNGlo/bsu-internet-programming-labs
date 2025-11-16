@@ -6,9 +6,9 @@ class ProductStore {
     let sql = 'SELECT * FROM products WHERE 1=1';
     const params = [];
 
-    if (filters.category) {
-      sql += ' AND LOWER(category) = LOWER(?)';
-      params.push(filters.category);
+    if (filters.category_id) {
+      sql += ' AND category_id = ?';
+      params.push(filters.category_id);
     }
 
     if (filters.inStock !== undefined) {
@@ -45,7 +45,7 @@ class ProductStore {
     const product = new Product(data);
 
     const sql = `
-      INSERT INTO products (id, name, description, price, category, inStock, createdAt, updatedAt)
+      INSERT INTO products (id, name, description, price, category_id, inStock, createdAt, updatedAt)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
@@ -54,7 +54,7 @@ class ProductStore {
       product.name,
       product.description,
       product.price,
-      product.category,
+      product.category_id,
       product.inStock ? 1 : 0,
       product.createdAt.toISOString(),
       product.updatedAt.toISOString()
@@ -71,14 +71,14 @@ class ProductStore {
       name: data.name !== undefined ? data.name : existingProduct.name,
       description: data.description !== undefined ? data.description : existingProduct.description,
       price: data.price !== undefined ? data.price : existingProduct.price,
-      category: data.category !== undefined ? data.category : existingProduct.category,
+      category_id: data.category_id !== undefined ? data.category_id : existingProduct.category_id,
       inStock: data.inStock !== undefined ? data.inStock : existingProduct.inStock,
       updatedAt: new Date()
     };
 
     const sql = `
       UPDATE products
-      SET name = ?, description = ?, price = ?, category = ?, inStock = ?, updatedAt = ?
+      SET name = ?, description = ?, price = ?, category_id = ?, inStock = ?, updatedAt = ?
       WHERE id = ?
     `;
 
@@ -86,7 +86,7 @@ class ProductStore {
       updatedData.name,
       updatedData.description,
       updatedData.price,
-      updatedData.category,
+      updatedData.category_id,
       updatedData.inStock ? 1 : 0,
       updatedData.updatedAt.toISOString(),
       id
@@ -111,7 +111,7 @@ class ProductStore {
       name: row.name,
       description: row.description,
       price: row.price,
-      category: row.category,
+      category_id: row.category_id,
       inStock: row.inStock === 1,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt)

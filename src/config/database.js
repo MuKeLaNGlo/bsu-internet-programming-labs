@@ -27,107 +27,66 @@ class Database {
     await this.seedData();
   }
 
-  createTables() {
-    return new Promise((resolve, reject) => {
-      const createTableSQL = `
-        CREATE TABLE IF NOT EXISTS products (
-          id TEXT PRIMARY KEY,
-          name TEXT NOT NULL,
-          description TEXT,
-          price REAL NOT NULL,
-          category TEXT DEFAULT 'Без категории',
-          inStock INTEGER DEFAULT 1,
-          createdAt TEXT NOT NULL,
-          updatedAt TEXT NOT NULL
-        )
-      `;
+  async createTables() {
+    const createCategoriesTableSQL = `
+      CREATE TABLE IF NOT EXISTS categories (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL UNIQUE,
+        description TEXT,
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL
+      )
+    `;
 
-      this.db.run(createTableSQL, (err) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
-    });
+    const createProductsTableSQL = `
+      CREATE TABLE IF NOT EXISTS products (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        description TEXT,
+        price REAL NOT NULL,
+        category_id TEXT,
+        inStock INTEGER DEFAULT 1,
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL,
+        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
+      )
+    `;
+
+    await this.run(createCategoriesTableSQL);
+    await this.run(createProductsTableSQL);
   }
 
   async seedData() {
-    return new Promise((resolve, reject) => {
-      this.db.get('SELECT COUNT(*) as count FROM products', async (err, row) => {
-        if (err) {
-          reject(err);
-          return;
-        }
+    const { seedCategories, getSeedProducts } = require('./seedData');
 
-        if (row.count === 0) {
-          const crypto = require('crypto');
-          const sampleProducts = [
-            {
-              id: crypto.randomUUID(),
-              name: 'Ноутбук Dell XPS 13',
-              description: 'Компактный и мощный ультрабук для работы и учебы',
-              price: 89999,
-              category: 'Электроника',
-              inStock: 1,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
-            },
-            {
-              id: crypto.randomUUID(),
-              name: 'Смартфон iPhone 15',
-              description: 'Последняя модель iPhone с улучшенной камерой',
-              price: 79999,
-              category: 'Электроника',
-              inStock: 1,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
-            },
-            {
-              id: crypto.randomUUID(),
-              name: 'Беспроводные наушники Sony WH-1000XM5',
-              description: 'Премиум наушники с активным шумоподавлением',
-              price: 29999,
-              category: 'Аудио',
-              inStock: 1,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
-            }
-          ];
+    const categoriesCount = await this.get('SELECT COUNT(*) as count FROM categories');
 
-          const insertSQL = `
-            INSERT INTO products (id, name, description, price, category, inStock, createdAt, updatedAt)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-          `;
+    if (categoriesCount.count === 0) {
+      for (const category of seedCategories) {
+        await this.run(
+          'INSERT INTO categories (id, name, description, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?)',
+          [category.id, category.name, category.description, category.createdAt, category.updatedAt]
+        );
+      }
 
-          const stmt = this.db.prepare(insertSQL);
+      console.log('Тестовые категории добавлены');
+    }
 
-          for (const product of sampleProducts) {
-            stmt.run(
-              product.id,
-              product.name,
-              product.description,
-              product.price,
-              product.category,
-              product.inStock,
-              product.createdAt,
-              product.updatedAt
-            );
-          }
+    const productsCount = await this.get('SELECT COUNT(*) as count FROM products');
 
-          stmt.finalize((err) => {
-            if (err) {
-              reject(err);
-            } else {
-              console.log('Тестовые данные добавлены');
-              resolve();
-            }
-          });
-        } else {
-          resolve();
-        }
-      });
-    });
+    if (productsCount.count === 0) {
+      const categories = await this.all('SELECT * FROM categories');
+      const sampleProducts = getSeedProducts(categories);
+
+      for (const product of sampleProducts) {
+        await this.run(
+          'INSERT INTO products (id, name, description, price, category_id, inStock, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          [product.id, product.name, product.description, product.price, product.category_id, product.inStock, product.createdAt, product.updatedAt]
+        );
+      }
+
+      console.log('Тестовые товары добавлены');
+    }
   }
 
   run(sql, params = []) {

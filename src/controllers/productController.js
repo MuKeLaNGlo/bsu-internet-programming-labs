@@ -4,10 +4,10 @@ const Product = require('../models/Product');
 class ProductController {
   async getAllProducts(req, res, next) {
     try {
-      const { category, inStock, minPrice, maxPrice, sortBy, order } = req.query;
+      const { category_id, inStock, minPrice, maxPrice, sortBy, order } = req.query;
 
       const filters = {
-        category,
+        category_id,
         inStock: inStock !== undefined ? inStock === 'true' : undefined,
         minPrice: minPrice ? parseFloat(minPrice) : undefined,
         maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
