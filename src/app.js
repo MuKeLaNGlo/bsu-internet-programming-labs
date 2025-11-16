@@ -40,7 +40,9 @@ app.get('/', (req, res) => {
         register: 'POST /api/auth/register',
         login: 'POST /api/auth/login',
         profile: 'GET /api/auth/profile (требуется токен)',
-        verifyEmail: 'GET /api/auth/verify-email?token=<token>'
+        verifyEmail: 'GET /api/auth/verify-email?token=<token>',
+        forgotPassword: 'POST /api/auth/forgot-password',
+        resetPassword: 'POST /api/auth/reset-password'
       },
       products: {
         list: 'GET /api/products (публичный)',

@@ -166,6 +166,100 @@ const authController = {
     } catch (error) {
       next(error);
     }
+  },
+
+  async forgotPassword(req, res, next) {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({
+          error: 'Email обязателен'
+        });
+      }
+
+      const userRow = await database.get('SELECT * FROM users WHERE email = ?', [email]);
+
+      if (!userRow) {
+        // Не раскрываем, существует ли пользователь
+        return res.json({
+          message: 'Если пользователь с таким email существует, письмо с инструкциями отправлено'
+        });
+      }
+
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const resetPasswordExpires = new Date(Date.now() + 3600000).toISOString(); // 1 час
+
+      await database.run(
+        'UPDATE users SET resetPasswordToken = ?, resetPasswordExpires = ?, updatedAt = ? WHERE id = ?',
+        [resetToken, resetPasswordExpires, new Date().toISOString(), userRow.id]
+      );
+
+      // Отправка письма с инструкциями
+      try {
+        await emailService.sendPasswordResetEmail(userRow.email, userRow.name, resetToken);
+      } catch (emailError) {
+        console.error('Ошибка отправки письма:', emailError);
+        // Продолжаем даже если письмо не отправилось
+      }
+
+      res.json({
+        message: 'Если пользователь с таким email существует, письмо с инструкциями отправлено'
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async resetPassword(req, res, next) {
+    try {
+      const { token, newPassword } = req.body;
+
+      if (!token || !newPassword) {
+        return res.status(400).json({
+          error: 'Токен и новый пароль обязательны'
+        });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({
+          error: 'Пароль должен быть не менее 6 символов'
+        });
+      }
+
+      const userRow = await database.get('SELECT * FROM users WHERE resetPasswordToken = ?', [token]);
+
+      if (!userRow) {
+        return res.status(400).json({
+          error: 'Недействительный токен сброса пароля'
+        });
+      }
+
+      // Проверка срока действия токена
+      const now = new Date();
+      const expiresAt = new Date(userRow.resetPasswordExpires);
+
+      if (now > expiresAt) {
+        return res.status(400).json({
+          error: 'Срок действия токена истек. Запросите сброс пароля заново'
+        });
+      }
+
+      // Хеширование нового пароля
+      const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+      // Обновление пароля и очистка токена
+      await database.run(
+        'UPDATE users SET password = ?, resetPasswordToken = ?, resetPasswordExpires = ?, updatedAt = ? WHERE id = ?',
+        [hashedPassword, null, null, new Date().toISOString(), userRow.id]
+      );
+
+      res.json({
+        message: 'Пароль успешно изменен'
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 };
 

@@ -62,6 +62,8 @@ class Database {
         name TEXT NOT NULL,
         emailVerified INTEGER DEFAULT 0,
         verificationToken TEXT,
+        resetPasswordToken TEXT,
+        resetPasswordExpires TEXT,
         createdAt TEXT NOT NULL,
         updatedAt TEXT NOT NULL
       )

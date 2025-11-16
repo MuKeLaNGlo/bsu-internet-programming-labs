@@ -8,6 +8,8 @@ class User {
     this.name = data.name;
     this.emailVerified = data.emailVerified || false;
     this.verificationToken = data.verificationToken || null;
+    this.resetPasswordToken = data.resetPasswordToken || null;
+    this.resetPasswordExpires = data.resetPasswordExpires || null;
     this.createdAt = data.createdAt || new Date().toISOString();
     this.updatedAt = data.updatedAt || new Date().toISOString();
 
@@ -41,6 +43,8 @@ class User {
     if (data.password !== undefined) this.password = data.password;
     if (data.emailVerified !== undefined) this.emailVerified = data.emailVerified;
     if (data.verificationToken !== undefined) this.verificationToken = data.verificationToken;
+    if (data.resetPasswordToken !== undefined) this.resetPasswordToken = data.resetPasswordToken;
+    if (data.resetPasswordExpires !== undefined) this.resetPasswordExpires = data.resetPasswordExpires;
     this.updatedAt = new Date().toISOString();
     this.validate();
     return this;

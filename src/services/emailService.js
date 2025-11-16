@@ -52,7 +52,7 @@ class EmailService {
           <p>Спасибо за регистрацию в Products API.</p>
           <p>Для подтверждения вашего email адреса, пожалуйста, нажмите на кнопку ниже:</p>
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${verificationLink}" 
+            <a href="${verificationLink}"
                style="background-color: #4CAF50; color: white; padding: 14px 28px; text-decoration: none; border-radius: 4px; display: inline-block;">
               Подтвердить Email
             </a>
@@ -74,6 +74,58 @@ class EmailService {
     } catch (error) {
       console.error('Ошибка отправки email:', error);
       throw new Error('Не удалось отправить письмо с подтверждением');
+    }
+  }
+
+  async sendPasswordResetEmail(userEmail, userName, resetToken) {
+    if (!this.transporter) {
+      await this.initialize();
+    }
+
+    if (!process.env.EMAIL_USER) {
+      console.warn('Email сервис не настроен. Письмо не отправлено.');
+      console.log(`Токен сброса пароля для ${userEmail}: ${resetToken}`);
+      return;
+    }
+
+    const appUrl = process.env.APP_URL || 'http://localhost:3000';
+    const resetLink = `${appUrl}/api/auth/reset-password?token=${resetToken}`;
+
+    const mailOptions = {
+      from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+      to: userEmail,
+      subject: 'Восстановление пароля - Products API',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Здравствуйте, ${userName}!</h2>
+          <p>Вы запросили восстановление пароля для вашего аккаунта в Products API.</p>
+          <p>Для сброса пароля, пожалуйста, нажмите на кнопку ниже:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetLink}"
+               style="background-color: #FF9800; color: white; padding: 14px 28px; text-decoration: none; border-radius: 4px; display: inline-block;">
+              Сбросить пароль
+            </a>
+          </div>
+          <p>Или скопируйте и вставьте эту ссылку в браузер:</p>
+          <p style="color: #666; word-break: break-all;">${resetLink}</p>
+          <p style="color: #d32f2f; margin-top: 20px;">
+            <strong>Важно:</strong> Эта ссылка действительна в течение 1 часа.
+          </p>
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+          <p style="color: #999; font-size: 12px;">
+            Если вы не запрашивали сброс пароля, просто проигнорируйте это письмо. Ваш пароль останется без изменений.
+          </p>
+        </div>
+      `
+    };
+
+    try {
+      const info = await this.transporter.sendMail(mailOptions);
+      console.log('Письмо с восстановлением пароля отправлено:', info.messageId);
+      return info;
+    } catch (error) {
+      console.error('Ошибка отправки email:', error);
+      throw new Error('Не удалось отправить письмо с восстановлением пароля');
     }
   }
 }
