@@ -54,8 +54,20 @@ class Database {
       )
     `;
 
+    const createUsersTableSQL = `
+      CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY,
+        email TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL,
+        name TEXT NOT NULL,
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL
+      )
+    `;
+
     await this.run(createCategoriesTableSQL);
     await this.run(createProductsTableSQL);
+    await this.run(createUsersTableSQL);
   }
 
   async seedData() {

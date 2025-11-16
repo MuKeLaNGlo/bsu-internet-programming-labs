@@ -16,10 +16,12 @@
   "author": "Каранинский Михаил Евгеньевич",
   "license": "MIT",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^4.18.2",
     "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "multer": "^2.0.2",
     "sqlite3": "^5.1.7"

@@ -6,6 +6,7 @@ const morgan = require('morgan');
 const config = require('./config');
 const productRoutes = require('./routes/productRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
+const authRoutes = require('./routes/authRoutes');
 const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
@@ -28,13 +29,18 @@ app.get('/health', (req, res) => {
 
 app.get('/', (req, res) => {
   res.json({
-    message: 'Products API Server with Categories and File Uploads',
-    version: '3.0.0',
+    message: 'Products API Server with Categories, File Uploads and Authentication',
+    version: '4.0.0',
     author: 'Михаил Каранинский',
     endpoints: {
       documentation: 'GET /',
       health: 'GET /health',
       static: 'GET /uploads/:type/:filename',
+      auth: {
+        register: 'POST /api/auth/register',
+        login: 'POST /api/auth/login',
+        profile: 'GET /api/auth/profile (требуется токен)'
+      },
       products: {
         list: 'GET /api/products',
         getById: 'GET /api/products/:id',
@@ -56,6 +62,7 @@ app.get('/', (req, res) => {
   });
 });
 
+app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 
