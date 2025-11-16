@@ -129,3 +129,6 @@ data/
 *.db
 *.sqlite
 *.sqlite3
+
+# Uploaded files
+public/uploads/

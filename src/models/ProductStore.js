@@ -45,8 +45,8 @@ class ProductStore {
     const product = new Product(data);
 
     const sql = `
-      INSERT INTO products (id, name, description, price, category_id, inStock, createdAt, updatedAt)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO products (id, name, description, price, category_id, image, inStock, createdAt, updatedAt)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     await database.run(sql, [
@@ -55,6 +55,7 @@ class ProductStore {
       product.description,
       product.price,
       product.category_id,
+      product.image,
       product.inStock ? 1 : 0,
       product.createdAt.toISOString(),
       product.updatedAt.toISOString()
@@ -72,13 +73,14 @@ class ProductStore {
       description: data.description !== undefined ? data.description : existingProduct.description,
       price: data.price !== undefined ? data.price : existingProduct.price,
       category_id: data.category_id !== undefined ? data.category_id : existingProduct.category_id,
+      image: data.image !== undefined ? data.image : existingProduct.image,
       inStock: data.inStock !== undefined ? data.inStock : existingProduct.inStock,
       updatedAt: new Date()
     };
 
     const sql = `
       UPDATE products
-      SET name = ?, description = ?, price = ?, category_id = ?, inStock = ?, updatedAt = ?
+      SET name = ?, description = ?, price = ?, category_id = ?, image = ?, inStock = ?, updatedAt = ?
       WHERE id = ?
     `;
 
@@ -87,6 +89,7 @@ class ProductStore {
       updatedData.description,
       updatedData.price,
       updatedData.category_id,
+      updatedData.image,
       updatedData.inStock ? 1 : 0,
       updatedData.updatedAt.toISOString(),
       id
@@ -112,6 +115,7 @@ class ProductStore {
       description: row.description,
       price: row.price,
       category_id: row.category_id,
+      image: row.image,
       inStock: row.inStock === 1,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt)

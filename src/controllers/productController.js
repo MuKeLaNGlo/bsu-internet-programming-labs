@@ -105,6 +105,37 @@ class ProductController {
     }
   }
 
+  async uploadImage(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          error: 'Файл изображения не загружен'
+        });
+      }
+
+      const imagePath = `/uploads/products/${req.file.filename}`;
+      const product = await productStore.updateProduct(id, { image: imagePath });
+
+      if (!product) {
+        return res.status(404).json({
+          success: false,
+          error: 'Товар не найден'
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Изображение успешно загружено',
+        data: product
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async deleteProduct(req, res, next) {
     try {
       const { id } = req.params;

@@ -33,6 +33,7 @@ class Database {
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL UNIQUE,
         description TEXT,
+        image TEXT,
         createdAt TEXT NOT NULL,
         updatedAt TEXT NOT NULL
       )
@@ -45,6 +46,7 @@ class Database {
         description TEXT,
         price REAL NOT NULL,
         category_id TEXT,
+        image TEXT,
         inStock INTEGER DEFAULT 1,
         createdAt TEXT NOT NULL,
         updatedAt TEXT NOT NULL,

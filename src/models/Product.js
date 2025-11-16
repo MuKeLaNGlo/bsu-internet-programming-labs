@@ -11,6 +11,7 @@ class Product {
     this.description = data.description || '';
     this.price = data.price;
     this.category_id = data.category_id || null;
+    this.image = data.image || null;
     this.inStock = data.inStock !== undefined ? data.inStock : true;
     this.createdAt = data.createdAt || new Date();
     this.updatedAt = data.updatedAt || new Date();
@@ -58,6 +59,7 @@ class Product {
     if (data.description !== undefined) this.description = data.description;
     if (data.price !== undefined) this.price = data.price;
     if (data.category_id !== undefined) this.category_id = data.category_id;
+    if (data.image !== undefined) this.image = data.image;
     if (data.inStock !== undefined) this.inStock = data.inStock;
     this.updatedAt = new Date();
     return this;
@@ -70,6 +72,7 @@ class Product {
       description: this.description,
       price: this.price,
       category_id: this.category_id,
+      image: this.image,
       inStock: this.inStock,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt

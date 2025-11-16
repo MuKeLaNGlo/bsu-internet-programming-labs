@@ -7,6 +7,7 @@ class CategoryStore {
       id: row.id,
       name: row.name,
       description: row.description,
+      image: row.image,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt
     });
@@ -27,13 +28,14 @@ class CategoryStore {
   async createCategory(categoryData) {
     const category = new Category(categoryData);
     const sql = `
-      INSERT INTO categories (id, name, description, createdAt, updatedAt)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO categories (id, name, description, image, createdAt, updatedAt)
+      VALUES (?, ?, ?, ?, ?, ?)
     `;
     await database.run(sql, [
       category.id,
       category.name,
       category.description,
+      category.image,
       category.createdAt,
       category.updatedAt
     ]);
@@ -50,6 +52,7 @@ class CategoryStore {
       id: existingCategory.id,
       name: data.name !== undefined ? data.name : existingCategory.name,
       description: data.description !== undefined ? data.description : existingCategory.description,
+      image: data.image !== undefined ? data.image : existingCategory.image,
       createdAt: existingCategory.createdAt,
       updatedAt: new Date().toISOString()
     };
@@ -58,12 +61,13 @@ class CategoryStore {
 
     const sql = `
       UPDATE categories
-      SET name = ?, description = ?, updatedAt = ?
+      SET name = ?, description = ?, image = ?, updatedAt = ?
       WHERE id = ?
     `;
     await database.run(sql, [
       updatedCategory.name,
       updatedCategory.description,
+      updatedCategory.image,
       updatedCategory.updatedAt,
       id
     ]);

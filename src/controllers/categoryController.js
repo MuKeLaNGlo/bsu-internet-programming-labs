@@ -123,6 +123,37 @@ const categoryController = {
     }
   },
 
+  async uploadImage(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          error: 'Файл изображения не загружен'
+        });
+      }
+
+      const imagePath = `/uploads/categories/${req.file.filename}`;
+      const category = await categoryStore.updateCategory(id, { image: imagePath });
+
+      if (!category) {
+        return res.status(404).json({
+          success: false,
+          error: 'Категория не найдена'
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Изображение успешно загружено',
+        data: category
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   async getCategoryProducts(req, res, next) {
     try {
       const { id } = req.params;

@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -15,6 +16,9 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Раздача статических файлов
+app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
@@ -24,18 +28,20 @@ app.get('/health', (req, res) => {
 
 app.get('/', (req, res) => {
   res.json({
-    message: 'Products API Server with Categories',
-    version: '2.0.0',
+    message: 'Products API Server with Categories and File Uploads',
+    version: '3.0.0',
     author: 'Михаил Каранинский',
     endpoints: {
       documentation: 'GET /',
       health: 'GET /health',
+      static: 'GET /uploads/:type/:filename',
       products: {
         list: 'GET /api/products',
         getById: 'GET /api/products/:id',
         create: 'POST /api/products',
         update: 'PUT /api/products/:id',
-        delete: 'DELETE /api/products/:id'
+        delete: 'DELETE /api/products/:id',
+        uploadImage: 'POST /api/products/:id/upload-image'
       },
       categories: {
         list: 'GET /api/categories',
@@ -43,7 +49,8 @@ app.get('/', (req, res) => {
         create: 'POST /api/categories',
         update: 'PUT /api/categories/:id',
         delete: 'DELETE /api/categories/:id',
-        products: 'GET /api/categories/:id/products'
+        products: 'GET /api/categories/:id/products',
+        uploadImage: 'POST /api/categories/:id/upload-image'
       }
     }
   });

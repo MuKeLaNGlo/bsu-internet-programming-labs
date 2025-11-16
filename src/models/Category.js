@@ -5,6 +5,7 @@ class Category {
     this.id = data.id || randomUUID();
     this.name = data.name;
     this.description = data.description || '';
+    this.image = data.image || null;
     this.createdAt = data.createdAt || new Date().toISOString();
     this.updatedAt = data.updatedAt || new Date().toISOString();
 
@@ -33,6 +34,7 @@ class Category {
   update(data) {
     if (data.name !== undefined) this.name = data.name;
     if (data.description !== undefined) this.description = data.description;
+    if (data.image !== undefined) this.image = data.image;
     this.updatedAt = new Date().toISOString();
     this.validate();
     return this;
@@ -43,6 +45,7 @@ class Category {
       id: this.id,
       name: this.name,
       description: this.description,
+      image: this.image,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     };
