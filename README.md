@@ -15,6 +15,9 @@ REST API для управления товарами и категориями 
 - Подтверждение email адреса пользователя
 - Восстановление пароля через email
 - Защищенные маршруты (требующие авторизации)
+- Управление заказами интернет-магазина
+- Пагинация и фильтрация товаров
+- Фиксация цен на момент покупки
 - Фильтрация и валидация данных
 - Хранение данных в SQLite
 
@@ -29,7 +32,7 @@ REST API для управления товарами и категориями 
 - `POST /api/auth/reset-password` - Сброс пароля по токену
 
 ### Products
-- `GET /api/products` - Получить все товары (публичный)
+- `GET /api/products` - Получить все товары с пагинацией (публичный)
 - `GET /api/products/:id` - Получить товар по ID (публичный)
 - `POST /api/products` - Создать товар (требуется токен)
 - `PUT /api/products/:id` - Обновить товар (требуется токен)
@@ -44,6 +47,14 @@ REST API для управления товарами и категориями 
 - `DELETE /api/categories/:id` - Удалить категорию (требуется токен)
 - `GET /api/categories/:id/products` - Получить товары категории (публичный)
 - `POST /api/categories/:id/upload-image` - Загрузить изображение (требуется токен)
+
+### Orders
+- `GET /api/orders` - Получить все заказы текущего пользователя (требуется токен)
+- `GET /api/orders/:id` - Получить заказ по ID (требуется токен)
+- `POST /api/orders` - Создать новый заказ (требуется токен)
+- `GET /api/orders/:id/items` - Получить товары заказа (требуется токен)
+- `PATCH /api/orders/:id/status` - Обновить статус заказа (требуется токен)
+- `DELETE /api/orders/:id` - Удалить заказ (требуется токен)
 
 ### Static Files
 - `GET /uploads/products/:filename` - Получить изображение товара
@@ -168,6 +179,33 @@ curl -X POST http://localhost:3000/api/auth/reset-password \
 
 ### Работа с товарами
 
+#### Получить список товаров с пагинацией
+```bash
+# Получить первую страницу (10 товаров)
+curl http://localhost:3000/api/products?page=1&limit=10
+
+# Получить товары с фильтром по категории
+curl http://localhost:3000/api/products?category_id=uuid-категории&page=1&limit=5
+
+# Получить товары с фильтрами и сортировкой
+curl "http://localhost:3000/api/products?inStock=true&minPrice=1000&maxPrice=50000&sortBy=price&order=asc&page=1&limit=10"
+```
+
+Ответ с пагинацией:
+```json
+{
+  "success": true,
+  "pagination": {
+    "currentPage": 1,
+    "pageSize": 10,
+    "totalItems": 42,
+    "totalPages": 5
+  },
+  "count": 10,
+  "data": [...]
+}
+```
+
 #### Создать товар
 ```bash
 curl -X POST http://localhost:3000/api/products \
@@ -188,6 +226,114 @@ curl -X POST -F "image=@product.jpg" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   http://localhost:3000/api/products/{id}/upload-image
 ```
+
+### Работа с заказами
+
+Все операции с заказами требуют авторизации (JWT токен в заголовке Authorization).
+
+#### Создать заказ
+```bash
+curl -X POST http://localhost:3000/api/orders \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "items": [
+      {
+        "product_id": "uuid-товара-1",
+        "quantity": 2
+      },
+      {
+        "product_id": "uuid-товара-2",
+        "quantity": 1
+      }
+    ]
+  }'
+```
+
+Ответ:
+```json
+{
+  "success": true,
+  "message": "Заказ успешно создан",
+  "data": {
+    "id": "uuid-заказа",
+    "user_id": "uuid-пользователя",
+    "status": "pending",
+    "total_amount": 179998,
+    "createdAt": "2025-01-17T10:30:00.000Z",
+    "updatedAt": "2025-01-17T10:30:00.000Z"
+  }
+}
+```
+
+**Важно:**
+- Система автоматически проверяет наличие товаров на складе
+- Цена товара фиксируется на момент создания заказа (price_at_purchase)
+- Общая сумма заказа рассчитывается автоматически
+
+#### Получить все заказы пользователя
+```bash
+curl http://localhost:3000/api/orders \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+#### Получить заказ по ID
+```bash
+curl http://localhost:3000/api/orders/{order_id} \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+#### Получить товары заказа
+```bash
+curl http://localhost:3000/api/orders/{order_id}/items \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+Ответ с товарами заказа:
+```json
+{
+  "success": true,
+  "count": 2,
+  "data": [
+    {
+      "id": "uuid-order-item-1",
+      "order_id": "uuid-заказа",
+      "product_id": "uuid-товара-1",
+      "quantity": 2,
+      "price_at_purchase": 89999,
+      "product_name": "Ноутбук Dell XPS 13",
+      "product_description": "Компактный ультрабук",
+      "product_image": null,
+      "createdAt": "2025-01-17T10:30:00.000Z",
+      "updatedAt": "2025-01-17T10:30:00.000Z"
+    }
+  ]
+}
+```
+
+#### Обновить статус заказа
+```bash
+curl -X PATCH http://localhost:3000/api/orders/{order_id}/status \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "status": "completed"
+  }'
+```
+
+Доступные статусы:
+- `pending` - ожидает обработки
+- `processing` - в обработке
+- `completed` - завершен
+- `cancelled` - отменен
+
+#### Удалить заказ
+```bash
+curl -X DELETE http://localhost:3000/api/orders/{order_id} \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+**Примечание:** При удалении заказа автоматически удаляются все связанные товары заказа (CASCADE).
 
 ## Технологии
 

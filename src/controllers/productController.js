@@ -4,7 +4,12 @@ const Product = require('../models/Product');
 class ProductController {
   async getAllProducts(req, res, next) {
     try {
-      const { category_id, inStock, minPrice, maxPrice, sortBy, order } = req.query;
+      const { category_id, inStock, minPrice, maxPrice, sortBy, order, page, limit } = req.query;
+
+      // Пагинация
+      const currentPage = parseInt(page) || 1;
+      const pageSize = parseInt(limit) || 10;
+      const offset = (currentPage - 1) * pageSize;
 
       const filters = {
         category_id,
@@ -12,13 +17,22 @@ class ProductController {
         minPrice: minPrice ? parseFloat(minPrice) : undefined,
         maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
         sortBy,
-        order
+        order,
+        limit: pageSize,
+        offset
       };
 
       const products = await productStore.getAllProducts(filters);
+      const totalCount = await productStore.getProductsCount(filters);
 
       res.status(200).json({
         success: true,
+        pagination: {
+          currentPage,
+          pageSize,
+          totalItems: totalCount,
+          totalPages: Math.ceil(totalCount / pageSize)
+        },
         count: products.length,
         data: products
       });

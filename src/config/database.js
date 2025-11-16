@@ -47,7 +47,7 @@ class Database {
         price REAL NOT NULL,
         category_id TEXT,
         image TEXT,
-        inStock INTEGER DEFAULT 1,
+        stock_quantity INTEGER DEFAULT 0,
         createdAt TEXT NOT NULL,
         updatedAt TEXT NOT NULL,
         FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
@@ -59,7 +59,9 @@ class Database {
         id TEXT PRIMARY KEY,
         email TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL,
-        name TEXT NOT NULL,
+        first_name TEXT,
+        last_name TEXT,
+        avatar TEXT,
         emailVerified INTEGER DEFAULT 0,
         verificationToken TEXT,
         resetPasswordToken TEXT,
@@ -69,9 +71,52 @@ class Database {
       )
     `;
 
+    const createOrdersTableSQL = `
+      CREATE TABLE IF NOT EXISTS orders (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending',
+        total_amount REAL NOT NULL DEFAULT 0,
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `;
+
+    const createOrderItemsTableSQL = `
+      CREATE TABLE IF NOT EXISTS order_items (
+        id TEXT PRIMARY KEY,
+        order_id TEXT NOT NULL,
+        product_id TEXT NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 1,
+        price_at_purchase REAL NOT NULL,
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL,
+        FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+      )
+    `;
+
+    const createReviewsTableSQL = `
+      CREATE TABLE IF NOT EXISTS reviews (
+        id TEXT PRIMARY KEY,
+        product_id TEXT NOT NULL,
+        user_id TEXT NOT NULL,
+        text TEXT NOT NULL,
+        rating INTEGER,
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL,
+        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `;
+
     await this.run(createCategoriesTableSQL);
     await this.run(createProductsTableSQL);
     await this.run(createUsersTableSQL);
+    await this.run(createOrdersTableSQL);
+    await this.run(createOrderItemsTableSQL);
+    await this.run(createReviewsTableSQL);
   }
 
   async seedData() {
@@ -98,8 +143,8 @@ class Database {
 
       for (const product of sampleProducts) {
         await this.run(
-          'INSERT INTO products (id, name, description, price, category_id, inStock, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-          [product.id, product.name, product.description, product.price, product.category_id, product.inStock, product.createdAt, product.updatedAt]
+          'INSERT INTO products (id, name, description, price, category_id, stock_quantity, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          [product.id, product.name, product.description, product.price, product.category_id, product.stock_quantity, product.createdAt, product.updatedAt]
         );
       }
 

@@ -37,7 +37,7 @@ const getSeedProducts = (categories) => {
       description: 'Компактный и мощный ультрабук для работы и учебы',
       price: 89999,
       category_id: electronicsCategory.id,
-      inStock: 1,
+      stock_quantity: 15,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     },
@@ -47,7 +47,7 @@ const getSeedProducts = (categories) => {
       description: 'Последняя модель iPhone с улучшенной камерой',
       price: 79999,
       category_id: electronicsCategory.id,
-      inStock: 1,
+      stock_quantity: 25,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     },
@@ -57,7 +57,7 @@ const getSeedProducts = (categories) => {
       description: 'Премиум наушники с активным шумоподавлением',
       price: 29999,
       category_id: audioCategory.id,
-      inStock: 1,
+      stock_quantity: 10,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }

@@ -32,8 +32,47 @@ class ProductStore {
       sql += ` ORDER BY ${sortField} ${sortOrder}`;
     }
 
+    // Пагинация
+    if (filters.limit !== undefined) {
+      sql += ' LIMIT ?';
+      params.push(filters.limit);
+    }
+
+    if (filters.offset !== undefined) {
+      sql += ' OFFSET ?';
+      params.push(filters.offset);
+    }
+
     const rows = await database.all(sql, params);
     return rows.map(row => this.rowToProduct(row));
+  }
+
+  async getProductsCount(filters = {}) {
+    let sql = 'SELECT COUNT(*) as count FROM products WHERE 1=1';
+    const params = [];
+
+    if (filters.category_id) {
+      sql += ' AND category_id = ?';
+      params.push(filters.category_id);
+    }
+
+    if (filters.inStock !== undefined) {
+      sql += ' AND inStock = ?';
+      params.push(filters.inStock ? 1 : 0);
+    }
+
+    if (filters.minPrice !== undefined) {
+      sql += ' AND price >= ?';
+      params.push(filters.minPrice);
+    }
+
+    if (filters.maxPrice !== undefined) {
+      sql += ' AND price <= ?';
+      params.push(filters.maxPrice);
+    }
+
+    const row = await database.get(sql, params);
+    return row.count;
   }
 
   async getProductById(id) {

@@ -7,6 +7,8 @@ const config = require('./config');
 const productRoutes = require('./routes/productRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const authRoutes = require('./routes/authRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
 const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
@@ -29,8 +31,8 @@ app.get('/health', (req, res) => {
 
 app.get('/', (req, res) => {
   res.json({
-    message: 'Products API Server with Categories, File Uploads and Authentication',
-    version: '5.0.0',
+    message: 'Products API Server with Orders, Categories, File Uploads and Authentication',
+    version: '8.0.0',
     author: 'Михаил Каранинский',
     endpoints: {
       documentation: 'GET /',
@@ -60,6 +62,14 @@ app.get('/', (req, res) => {
         delete: 'DELETE /api/categories/:id (требуется токен)',
         products: 'GET /api/categories/:id/products (публичный)',
         uploadImage: 'POST /api/categories/:id/upload-image (требуется токен)'
+      },
+      orders: {
+        list: 'GET /api/orders (требуется токен)',
+        getById: 'GET /api/orders/:id (требуется токен)',
+        create: 'POST /api/orders (требуется токен)',
+        getItems: 'GET /api/orders/:id/items (требуется токен)',
+        updateStatus: 'PATCH /api/orders/:id/status (требуется токен)',
+        delete: 'DELETE /api/orders/:id (требуется токен)'
       }
     }
   });
@@ -68,6 +78,8 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
