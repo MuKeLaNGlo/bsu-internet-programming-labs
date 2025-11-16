@@ -60,6 +60,8 @@ class Database {
         email TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL,
         name TEXT NOT NULL,
+        emailVerified INTEGER DEFAULT 0,
+        verificationToken TEXT,
         createdAt TEXT NOT NULL,
         updatedAt TEXT NOT NULL
       )

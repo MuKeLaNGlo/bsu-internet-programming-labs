@@ -6,6 +6,8 @@ class User {
     this.email = data.email;
     this.password = data.password;
     this.name = data.name;
+    this.emailVerified = data.emailVerified || false;
+    this.verificationToken = data.verificationToken || null;
     this.createdAt = data.createdAt || new Date().toISOString();
     this.updatedAt = data.updatedAt || new Date().toISOString();
 
@@ -37,6 +39,8 @@ class User {
     if (data.email !== undefined) this.email = data.email;
     if (data.name !== undefined) this.name = data.name;
     if (data.password !== undefined) this.password = data.password;
+    if (data.emailVerified !== undefined) this.emailVerified = data.emailVerified;
+    if (data.verificationToken !== undefined) this.verificationToken = data.verificationToken;
     this.updatedAt = new Date().toISOString();
     this.validate();
     return this;
@@ -47,6 +51,7 @@ class User {
       id: this.id,
       email: this.email,
       name: this.name,
+      emailVerified: this.emailVerified,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
     };

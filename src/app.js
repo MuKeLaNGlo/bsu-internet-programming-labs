@@ -30,7 +30,7 @@ app.get('/health', (req, res) => {
 app.get('/', (req, res) => {
   res.json({
     message: 'Products API Server with Categories, File Uploads and Authentication',
-    version: '4.0.0',
+    version: '5.0.0',
     author: 'Михаил Каранинский',
     endpoints: {
       documentation: 'GET /',
@@ -39,24 +39,25 @@ app.get('/', (req, res) => {
       auth: {
         register: 'POST /api/auth/register',
         login: 'POST /api/auth/login',
-        profile: 'GET /api/auth/profile (требуется токен)'
+        profile: 'GET /api/auth/profile (требуется токен)',
+        verifyEmail: 'GET /api/auth/verify-email?token=<token>'
       },
       products: {
-        list: 'GET /api/products',
-        getById: 'GET /api/products/:id',
-        create: 'POST /api/products',
-        update: 'PUT /api/products/:id',
-        delete: 'DELETE /api/products/:id',
-        uploadImage: 'POST /api/products/:id/upload-image'
+        list: 'GET /api/products (публичный)',
+        getById: 'GET /api/products/:id (публичный)',
+        create: 'POST /api/products (требуется токен)',
+        update: 'PUT /api/products/:id (требуется токен)',
+        delete: 'DELETE /api/products/:id (требуется токен)',
+        uploadImage: 'POST /api/products/:id/upload-image (требуется токен)'
       },
       categories: {
-        list: 'GET /api/categories',
-        getById: 'GET /api/categories/:id',
-        create: 'POST /api/categories',
-        update: 'PUT /api/categories/:id',
-        delete: 'DELETE /api/categories/:id',
-        products: 'GET /api/categories/:id/products',
-        uploadImage: 'POST /api/categories/:id/upload-image'
+        list: 'GET /api/categories (публичный)',
+        getById: 'GET /api/categories/:id (публичный)',
+        create: 'POST /api/categories (требуется токен)',
+        update: 'PUT /api/categories/:id (требуется токен)',
+        delete: 'DELETE /api/categories/:id (требуется токен)',
+        products: 'GET /api/categories/:id/products (публичный)',
+        uploadImage: 'POST /api/categories/:id/upload-image (требуется токен)'
       }
     }
   });
